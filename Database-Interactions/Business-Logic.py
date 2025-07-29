@@ -29,7 +29,7 @@ except Exception as e:
     exit()
 
 # Query for average YPA via Sql-Queries.sql
-with open(r"C:\Users\joshn\NFL-Database-Final-Project\Database-Interactions\Sql-Queries.sql", "r") as file:
+with open(r"Database-Interactions\Sql-Queries.sql", "r") as file:
     query = file.read()
 
 cursor.execute(query)
