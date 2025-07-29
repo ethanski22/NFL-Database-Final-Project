@@ -1,3 +1,8 @@
+# Business Logic for NFL Player Performance Report. Begins by connecting to Azure SQL Database,
+# executing a SQL query to retrieve average yards per attempt (YPA) for players, categorizing their performance,
+# and displaying the results in a formatted report. The script uses environment variables for database credentials
+# and handles exceptions during the database connection process. The SQL query is read from an external file.
+
 import pyodbc
 import os
 from dotenv import load_dotenv
@@ -17,25 +22,17 @@ try:
         f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
     )
     cursor = conn.cursor()
-    print("✅ Connected to the database successfully!\n")
+    print("Connected to the database successfully!\n")
 except Exception as e:
-    print("❌ Database connection failed:", e)
+    print("Database connection failed:", e)
     exit()
 
 # Query for average YPA
-query = """
-SELECT 
-    p.first_name + ' ' + p.last_name AS player_name,
-    t.team_name,
-    AVG(CASE WHEN ps.passing_attempts > 0 THEN 
-        CAST(ps.passing_yards AS DECIMAL(10,2)) / ps.passing_attempts
-    ELSE 0 END) AS avg_ypa
-FROM PlayerStats ps
-JOIN Player p ON ps.player_id = p.player_id
-JOIN Team t ON p.team_id = t.team_id
-GROUP BY p.first_name, p.last_name, t.team_name
-ORDER BY avg_ypa DESC;
-"""
+with open(r"C:\Users\joshn\NFL-Database-Final-Project\Database-Interactions\Sql-Queries.sql", "r") as file:
+    query = file.read()
+
+cursor.execute(query)
+
 
 cursor.execute(query)
 rows = cursor.fetchall()
@@ -56,11 +53,15 @@ print("-" * 60)
 
 
 for row in rows:
-    player_name = row[0]
-    team_name = row[1]
-    avg_ypa = float(row[2])
+    conference_name = row[0]
+    division_name = row[1]
+    team_name = row[2]
+    player_name = f"{row[3]} {row[4]}"
+    avg_ypa = float(row[5])
     category = categorize(avg_ypa)
+
     print(f"{player_name:<25} {team_name:<15} {avg_ypa:<10.2f} {category}")
+
 
 # Close connection
 cursor.close()
