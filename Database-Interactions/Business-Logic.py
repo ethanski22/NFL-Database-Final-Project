@@ -3,11 +3,12 @@
 # and displaying the results in a formatted report. The script uses environment variables for database credentials
 # and handles exceptions during the database connection process. The SQL query is read from an external file.
 
+# Imports
 import pyodbc
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load env variables
 load_dotenv()
 
 server = os.getenv('DB_SERVER')
@@ -16,7 +17,7 @@ username = os.getenv('DB_USER')
 password = os.getenv('DB_PASSWORD')
 driver = os.getenv('DB_DRIVER')
 
-# Connect to Azure SQL Database
+# Connect to Azure SQL DB
 try:
     conn = pyodbc.connect(
         f'DRIVER={driver};SERVER={server};DATABASE={database};UID={username};PWD={password}'
@@ -27,20 +28,18 @@ except Exception as e:
     print("Database connection failed:", e)
     exit()
 
-# Query for average YPA
+# Query for average YPA via Sql-Queries.sql
 with open(r"C:\Users\joshn\NFL-Database-Final-Project\Database-Interactions\Sql-Queries.sql", "r") as file:
     query = file.read()
 
 cursor.execute(query)
 
-
-cursor.execute(query)
 rows = cursor.fetchall()
 
 # Business logic
 def categorize(avg_ypa):
     if avg_ypa >= 8.0:
-        return "Elite Passer"
+        return "Elite"
     elif avg_ypa >= 6.5:
         return "Above Average"
     else:
@@ -66,5 +65,3 @@ for row in rows:
 # Close connection
 cursor.close()
 conn.close()
-
-input("\nPress Enter to exit...")
